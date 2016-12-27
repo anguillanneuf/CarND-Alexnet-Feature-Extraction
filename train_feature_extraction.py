@@ -3,6 +3,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from alexnet import AlexNet
 import numpy as np
+from sklearn.utils import shuffle
 
 # TODO: Load traffic signs data.
 with open("train.p", mode='rb') as f:
@@ -60,7 +61,7 @@ with tf.Session(graph=graph) as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
     
-    nb_epochs = 10
+    nb_epochs = 1
     batch_size = 16
     
     def accuracy(pred, labels):
@@ -69,7 +70,7 @@ with tf.Session(graph=graph) as sess:
     
     for epoch in range(nb_epochs):
         total_batch = np.int(X_train.shape[0]/batch_size)
-        
+        X_train, y_train = shuffle(X_train, y_train)
         for i in range(total_batch):
             offset = i * batch_size
             batch_x = X_train[offset:(offset+batch_size), ]/255.0
