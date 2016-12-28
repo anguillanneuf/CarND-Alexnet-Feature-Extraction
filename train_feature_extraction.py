@@ -1,9 +1,11 @@
 import pickle
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+# from sklearn.cross_validation import train_test_split
 from alexnet import AlexNet
 import numpy as np
 from sklearn.utils import shuffle
+import time
 
 # TODO: Load traffic signs data.
 with open("train.p", mode='rb') as f:
@@ -62,13 +64,14 @@ with tf.Session(graph=graph) as sess:
     sess.run(init)
     
     nb_epochs = 1
-    batch_size = 16
+    batch_size = 32
     
     def accuracy(pred, labels):
         return (np.sum(np.equal(np.argmax(pred, 1),labels)))/pred.shape[0]
         
     
     for epoch in range(nb_epochs):
+        t0 = time.time()
         total_batch = np.int(X_train.shape[0]/batch_size)
         X_train, y_train = shuffle(X_train, y_train)
         for i in range(total_batch):
@@ -78,16 +81,25 @@ with tf.Session(graph=graph) as sess:
             sess.run([optimizer, train_prediction], 
                      feed_dict={x: batch_x, y: batch_y})
     
-        for k in range(0, X_val.shape[0], 227):
+        for k in range(0, X_val.shape[0], 57):
             l, p = sess.run([loss, train_prediction], 
-                            feed_dict={x: X_val[k:(k+227), ],
-                                       y: y_val[k:(k+227)]})
-            acc_val.append(accuracy(p, y_val[k:(k+227)]))
+                            feed_dict={x: X_val[k:(k+57), ],
+                                       y: y_val[k:(k+57)]})
+            acc_val.append(accuracy(p, y_val[k:(k+57)]))
             loss_val.append(l)
-        print("Epoch {}: ".foramt(epoch))
+        print("Epoch {}: ".format(epoch))
+        print("Time spend: {}".format(time.time()-t0))
         print("Validation Loss: {}".format(np.mean(loss_val)))
         print("Validation Accuracy: {:.3%}".format(np.mean(acc_val)))
-            
+
+"""
+(As a point of reference one epoch over the training set takes roughly 53-55 
+seconds with a GTX 970.)
+Epoch 0: 
+Time spend: 932.5579879283905
+Validation Loss: 16.838653564453125
+Validation Accuracy: 21.470%
+"""            
             
             
             
